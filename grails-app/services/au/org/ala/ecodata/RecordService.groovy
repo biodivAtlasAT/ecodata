@@ -19,6 +19,8 @@ import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
 
+import java.text.SimpleDateFormat
+
 import static au.org.ala.ecodata.Status.ACTIVE
 import static au.org.ala.ecodata.Status.DELETED
 import static grails.async.Promises.task
@@ -138,6 +140,15 @@ class RecordService {
 
         //write out each record
         recordList.each {
+            String formatted_date_string = ""
+            // convert UTC-Date to local date (e.g. CET)
+            if (it.eventDate != null) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+                Date date = sdf.parse(it.eventDate);
+                formatted_date_string = date.format("yyyy-MM-dd'T'HH:mm:ss'Z'")
+            }
+
             Map map = toMap(it)
             csvWriter.writeNext([
                     map.occurrenceID ?: "",
@@ -146,7 +157,8 @@ class RecordService {
                     map.kingdom ?: "",
                     map.decimalLatitude ?: "",
                     map.decimalLongitude ?: "",
-                    map.eventDate ?: "",
+                    //map.eventDate ?: "",
+                    formatted_date_string,
                     map.userId ?: "",
                     map.recordedBy ?: "",
                     map.usingReverseGeocodedLocality ?: "",
