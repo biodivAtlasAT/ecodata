@@ -172,7 +172,10 @@ class RecordService {
                     map.imageLicence ?: "",
                     map.locality ?: "",
                     map.multimedia ? map.multimedia.collect { it.identifier }.join(";") : "",
-                    it.lastUpdated ? it.lastUpdated.format("dd-MM-yyyy") : ""
+                    it.lastUpdated ? it.lastUpdated.format("dd-MM-yyyy") : "",
+                    "", //locationId is blank
+                    map.institutionCode ?: "",
+                    map.collectionCode ?: "",
             ] as String[])
         }
         csvWriter.flush()
@@ -387,7 +390,9 @@ class RecordService {
             try {
                 json.multimedia.eachWithIndex { image, idx ->
 
-                    record.multimedia[idx] = [:]
+                    if (image.identifier != "") {
+
+                        record.multimedia[idx] = [:]
 
                     // Each image in Ecodata may have an associated Document entity. We need to maintain this relationship in the resulting Record entity
                     record.multimedia[idx].documentId = image.documentId
@@ -420,7 +425,7 @@ class RecordService {
                             toDelete = true
                         }
 
-                        if(downloadedFile) {
+                        if (downloadedFile) {
                             def imageId = uploadImage(record, downloadedFile, image)
                             if (imageId) {
                                 // successfully uploaded image to server
@@ -452,11 +457,12 @@ class RecordService {
                     setDCTerms(image, record.multimedia[idx])
 
                     if (alreadyLoaded) {
-                        log.debug "Refreshing metadata - ${image.identifier}"
+                        log.debug "Refreshing metadata - ${image.identifier} for idx: ${idx}"
                         //refresh metadata in imageMetadata service
                         updateImageMetadata(image.imageId, record, record.multimedia[idx])
                     }
                 }
+            }
             } catch (Exception ex) {
                 log.error("Error uploading image to ${grailsApplication.config.getProperty('imagesService.baseURL')} -${ex.message}")
             }
@@ -738,7 +744,9 @@ class RecordService {
                         "locality",
                         "associatedMedia",
                         "modified",
-                        "locationID"
+                        "locationID",
+                        "institutionCode",
+                        "collectionCode"
                 ] as String[]
         )
 
