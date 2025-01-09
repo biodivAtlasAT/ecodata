@@ -96,7 +96,15 @@ class RecordConverter {
         baseRecordModels?.each { Map dataModel ->
             RecordFieldConverter converter = getFieldConverter(dataModel.dataType)
             List<Map> recordFieldSets = converter.convert(data, dataModel)
-            baseRecord << recordFieldSets[0]
+            if (dataModel.dataType == "image") {
+                if (recordFieldSets.multimedia[0]["identifier"] != "") {
+                    if (baseRecord?.multimedia) {
+                        baseRecord.multimedia << recordFieldSets.multimedia[0]
+                    } else
+                        baseRecord << recordFieldSets[0]
+                }
+            } else
+                baseRecord << recordFieldSets[0]
         }
 
         List<Map> records = []
