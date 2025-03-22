@@ -100,8 +100,9 @@ class RecordConverter {
                 if (recordFieldSets.multimedia[0]["identifier"] != "") {
                     if (baseRecord?.multimedia) {
                         baseRecord.multimedia << recordFieldSets.multimedia[0]
-                    } else
-                        baseRecord << recordFieldSets[0]
+                    }
+                } else {
+                    baseRecord << recordFieldSets[0]
                 }
             } else
                 baseRecord << recordFieldSets[0]
